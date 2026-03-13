@@ -1,7 +1,8 @@
 # Budget Tracker Application
 
 ## Student Information
-Name: Adrian Dela Cruz  
+Name: Adrian Dela Cruz
+Section: BSICT-3B1 
 Assignment: Assignment 1 – Implement Two Small Features  
 Application: Budget Tracker System
 

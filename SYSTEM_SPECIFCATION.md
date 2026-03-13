@@ -1,6 +1,3 @@
-Based on everything you built, your **Budget Tracker System specification** can now be updated to match the **actual features of your system**. You already implemented most of them. Here is a **clean specs version aligned with your project**.
-
----
 
 # Budget Tracker System Specification
 
@@ -8,9 +5,9 @@ Based on everything you built, your **Budget Tracker System specification** can 
 
 The **Budget Tracker System** is a personal finance web application that allows users to manage and monitor their income and expenses.
 
-The system allows users to register and log in securely, record financial transactions, upload receipt images, and view transaction records through a dashboard. Each user has their own account and can only access their own financial data.
+The system enables users to register and log in securely, record financial transactions, upload receipt images, and view transaction records through a dashboard. Each user has their own account and can only access their own financial data.
 
-The system supports full **transaction management**, including creating, viewing, and deleting transactions. Uploaded receipt images are stored on the server while the file names are stored in the database.
+The system supports transaction management including creating, viewing, and deleting transactions. Uploaded receipt images are stored on the server while the file names are stored in the database.
 
 This system helps users track their spending habits and maintain organized financial records.
 
@@ -39,7 +36,7 @@ To develop a secure and user-friendly budget tracking system that enables users 
 
 ### User Registration
 
-Users can create an account by providing:
+Users can create an account by providing the following information:
 
 * Name
 * Email
@@ -60,7 +57,7 @@ Users can log out of the system which clears the stored session.
 
 ---
 
-# 3.2 Transaction Management
+## 3.2 Transaction Management
 
 Users can manage their financial transactions through the dashboard.
 
@@ -112,7 +109,7 @@ The system shall:
 
 ## Usability
 
-The system must provide a simple and easy-to-use interface.
+The system must provide a simple and easy-to-use interface for managing transactions and viewing financial data.
 
 ## Security
 
@@ -124,7 +121,7 @@ The system should quickly load transaction data and receipt images.
 
 ## Reliability
 
-Transaction data must be stored securely in the database without loss.
+Transaction data must be stored securely in the database without data loss.
 
 ---
 
@@ -166,18 +163,3 @@ Transaction data must be stored securely in the database without loss.
 7. Transaction data is saved to the database.
 8. User can view or delete transactions.
 9. User logs out after finishing.
-
----
-
-# Features Your System Currently Has
-
-✔ User Registration
-✔ User Login
-✔ User Logout
-✔ Multi-User Accounts
-✔ Add Transaction
-✔ Upload Receipt Image
-✔ View Transactions
-✔ Delete Transactions
-✔ User-specific Dashboard
-
