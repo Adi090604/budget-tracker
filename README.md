@@ -5,15 +5,13 @@ Name: Adrian Dela Cruz
 Assignment: Assignment 1 – Implement Two Small Features  
 Application: Budget Tracker System
 
----
 
 # Overview
-
 This project is a **Budget Tracker web application** that allows users to manage their expenses and monitor their financial activity. The application provides a dashboard where users can record transactions, view spending statistics, and track their budget progress.
 
-The system is designed to run **locally**, ensuring that it works even with unstable internet connections.
+The system includes a **transaction recording feature and a budget progress tracker with a spending limit**, helping users understand how much of their budget has been used.
 
----
+The system is designed to run **locally**, ensuring that it works even with unstable internet connections.
 
 # Implemented Features
 
@@ -111,13 +109,25 @@ During development, several challenges were encountered:
 
 # Screenshots
 
-The following screenshots demonstrate the working features of the application:
+The following screenshots demonstrate the working features of the application.
 
-1. Financial Overview Dashboard
-2. Record Transaction Form
-3. Recent Transactions Table
-4. Budget Progress Section
-5. Account Settings Page
+### Record Transaction Form
+![Record Transaction](screenshots/add-expenses.png)
+
+### Transaction Saved in Recent Transactions Table
+![Transactions](screenshots/transactions.png)
+
+### Budget Progress (Monthly View)
+![Budget Progress Monthly](screenshots/budgetprogress-monthly.png)
+
+### Budget Progress (Weekly View)
+![Budget Progress Weekly](screenshots/budgetprogress-weekly.png)
+
+### Set Spending Limit
+![Set Limit](screenshots/set-limit.png)
+
+### Dashboard Overview
+![Dashboard](screenshots/dashboard.png)
 
 ---
 
@@ -135,6 +145,3 @@ The following screenshots demonstrate the working features of the application:
 ### Database
 - MySQL
 - phpMyAdmin (WAMP)
-
----
-
