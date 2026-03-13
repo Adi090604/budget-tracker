@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Budget Tracker | Dashboard</title>
+    <link rel="stylesheet" href="dashboard.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <div class="app-container">
+        <aside class="sidebar">
+            <div class="profile-card">
+                <div class="avatar-wrapper">
+                    <img src="https://ui-avatars.com/api/?name=User&background=9d4edd&color=fff" id="userAvatar" alt="Profile">
+                </div>
+                <h3 id="userNameDisplay">Member Name</h3>
+                <span class="user-badge">Free Tier</span>
+            </div>
+
+            <nav class="sidebar-nav">
+                <a href="#" class="nav-link active" id="nav-overview" onclick="showSection('overview')">
+                    <i class="fas fa-chart-line"></i> Overview
+                </a>
+                <a href="#" class="nav-link" id="nav-wallets" onclick="showSection('wallets')">
+                    <i class="fas fa-wallet"></i> Wallets
+                </a>
+                <a href="#" class="nav-link" onclick="toggleForm()">
+                    <i class="fas fa-plus-circle"></i> Add New Expense
+                </a>
+                <a href="#" class="nav-link" id="nav-settings" onclick="showSection('settings')">
+                    <i class="fas fa-cog"></i> Settings
+                </a>
+            </nav>
+
+            <div class="sidebar-bottom">
+                <button class="logout-btn-sidebar" onclick="logout()">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </button>
+            </div>
+        </aside>
+
+        <main class="main-content">
+            <header class="header-row" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
+                <div>
+                    <h1 class="main-title" id="pageTitle">Financial Overview</h1>
+                    <p class="subtitle">Welcome back! Tracking your budget goals.</p>
+                </div>
+                <div class="date-display" id="currentDate">March 12, 2026</div>
+            </header>
+
+            <div id="overviewSection">
+                <section class="stats-container">
+                    <div class="stat-card">
+                        <span class="stat-label">Total Transactions</span>
+                        <h2 id="totalCount">0</h2>
+                    </div>
+                    <div class="stat-card highlight">
+                        <span class="stat-label">Total Expenses</span>
+                        <h2 id="totalExpenses">₱0.00</h2>
+                    </div>
+                    <div class="stat-card">
+                        <span class="stat-label">Daily Average</span>
+                        <h2 id="dailyAverage">₱0.00</h2>
+                    </div>
+                </section>
+
+                <section class="goals-container">
+                    <div class="goals-header">
+                        <div style="display: flex; align-items: center; gap: 15px;">
+                            <h2>Budget Progress</h2>
+                            <select id="budgetMode" onchange="loadTransactions()" style="background: #1a0b2e; color: #fff; border: 1px solid #3c096c; padding: 5px; border-radius: 5px; cursor: pointer;">
+                                <option value="monthly">Monthly</option>
+                                <option value="weekly">Weekly</option>
+                            </select>
+                        </div>
+                        <span class="view-all" onclick="setBudgetLimit()" style="cursor: pointer; color: #9d4edd;">Set Limit</span>
+                    </div>
+                    <div class="goal-card">
+                        <div class="goal-info">
+                            <span id="goalLabel">Monthly Spending</span>
+                            <span id="budgetPercent">0%</span>
+                        </div>
+                        <div class="progress-bar-bg">
+                            <div id="budgetBar" class="progress-fill"></div>
+                        </div>
+                        <p class="goal-status">Remaining: <span id="remainingBudget">₱0.00</span></p>
+                    </div>
+                </section>
+
+                <div class="table-container">
+                    <div class="table-header">
+                        <h2>Recent Transactions</h2>
+                    </div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Amount</th>
+                                <th>Category</th>
+                                <th>Date</th>
+                                <th>Notes</th>
+                                <th>Receipt</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="transactionTable"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div id="settingsSection" style="display: none;">
+                <div class="settings-card" style="background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(157, 78, 221, 0.2); border-radius: 20px; padding: 30px; max-width: 500px;">
+                    <h2 style="margin-bottom: 20px;">Account Settings</h2>
+
+                    <div style="margin-bottom: 20px;">
+                        <label style="color: #888; font-size: 0.8rem; text-transform: uppercase;">Profile Picture</label>
+                        <input type="file" id="editAvatar" accept="image/*" style="display: block; margin-top: 10px; color: #fff;">
+                    </div>
+                    
+                    <div style="margin-bottom: 20px;">
+                        <label style="color: #888; font-size: 0.8rem; text-transform: uppercase;">Full Name</label>
+                        <p id="displayFullname" style="font-size: 1.2rem; color: #fff; margin: 5px 0;">Loading...</p>
+                        <input type="text" id="editName" placeholder="Update Full Name" style="width:100%; padding:10px; background:#1a0b2e; border:1px solid #3c096c; color:white; border-radius:5px;">
+                    </div>
+
+                    <div style="margin-bottom: 20px;">
+                        <label style="color: #888; font-size: 0.8rem; text-transform: uppercase;">Username / Email</label>
+                        <p id="displayUsername" style="font-size: 1.1rem; color: #fff; margin: 5px 0;">@loading</p>
+                    </div>
+
+                    <div style="margin-bottom: 25px;">
+                        <label style="color: #888; font-size: 0.8rem; text-transform: uppercase;">New Password</label>
+                        <input type="password" id="editPassword" placeholder="Leave blank to keep current" style="width:100%; padding:10px; margin-top:5px; background:#1a0b2e; border:1px solid #3c096c; color:white; border-radius:5px;">
+                    </div>
+
+                    <div style="margin-bottom: 25px;">
+                        <label style="color: #888; font-size: 0.8rem; text-transform: uppercase;">User ID Reference</label>
+                        <p id="displayUserID" style="font-family: monospace; color: #c77dff; margin-top: 5px;">#00000</p>
+                    </div>
+
+                    <button onclick="saveSettings()" style="background:#9d4edd; color:white; border:none; padding:12px; border-radius:8px; cursor:pointer; width:100%; font-weight: bold; transition: 0.3s;">
+                        Save Profile Changes
+                    </button>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <div id="formSection" class="form-wrapper" style="display:none; position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:1000; justify-content:center; align-items:center;">
+        <div class="form-card" style="background:#1a0b2e; padding:30px; border-radius:15px; width:400px; border: 1px solid #3c096c;">
+            <div class="form-header" style="display: flex; justify-content: space-between; margin-bottom: 20px;">
+                <h2>Record Transaction</h2>
+                <span class="close-btn" onclick="toggleForm()" style="cursor:pointer; font-size: 24px;">&times;</span>
+            </div>
+            <form id="transactionForm" style="display:flex; flex-direction:column; gap:15px;">
+                <input type="number" id="amount" placeholder="Amount" required step="0.01" style="padding:10px; border-radius:5px; border:1px solid #3c096c; background:#0f051d; color:white;">
+                <input type="text" id="category" placeholder="Category" required style="padding:10px; border-radius:5px; border:1px solid #3c096c; background:#0f051d; color:white;">
+                <input type="date" id="date" required style="padding:10px; border-radius:5px; border:1px solid #3c096c; background:#0f051d; color:white;">
+                <input type="text" id="notes" placeholder="Notes (Optional)" style="padding:10px; border-radius:5px; border:1px solid #3c096c; background:#0f051d; color:white;">
+                <input type="file" id="receipt" style="color:#888;">
+                <button type="submit" class="submit-btn" style="background:#9d4edd; color:white; border:none; padding:12px; border-radius:5px; cursor:pointer; font-weight:bold;">Save Transaction</button>
+            </form>
+        </div>
+    </div>
+
+   <script>
+const user_id = localStorage.getItem("user_id");
+if (!user_id) window.location.href = "login.html";
+
+// Set current date on load
+document.getElementById("currentDate").innerText = new Date().toDateString();
+
+/* ---------------- NAVIGATION ---------------- */
+function showSection(sectionId) {
+    const overview = document.getElementById("overviewSection");
+    const settings = document.getElementById("settingsSection");
+    const pageTitle = document.getElementById("pageTitle");
+
+    overview.style.display = "none";
+    settings.style.display = "none";
+
+    if (sectionId === "settings") {
+        settings.style.display = "block";
+        pageTitle.innerText = "Account Settings";
+        fetchUserDetails();
+    } else {
+        overview.style.display = "block";
+        pageTitle.innerText = "Financial Overview";
+        loadTransactions();
+    }
+
+    document.querySelectorAll(".nav-link").forEach(link => link.classList.remove("active"));
+    const activeNav = document.getElementById(`nav-${sectionId}`);
+    if (activeNav) activeNav.classList.add("active");
+}
+
+/* ---------------- FORM ---------------- */
+function toggleForm() {
+    const form = document.getElementById("formSection");
+    form.style.display = (form.style.display === "none" || form.style.display === "") ? "flex" : "none";
+}
+
+/* ---------------- USER PROFILE ---------------- */
+async function fetchUserDetails() {
+    try {
+        const response = await fetch(`http://localhost:3000/users/${user_id}`);
+        const user = await response.json();
+
+        if (user) {
+            const avatarImg = document.getElementById("userAvatar");
+            if (user.avatar) {
+                avatarImg.src = `http://localhost:3000/uploads/${user.avatar}?t=${Date.now()}`;
+            } else {
+                avatarImg.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name)}&background=9d4edd&color=fff`;
+            }
+
+            document.getElementById("userNameDisplay").innerText = user.name;
+            document.getElementById("displayFullname").innerText = user.name;
+            document.getElementById("editName").value = user.name;
+            document.getElementById("displayUsername").innerText = user.email;
+            document.getElementById("displayUserID").innerText = `UID-${user.id.toString().padStart(5, "0")}`;
+        }
+    } catch (err) {
+        console.error("Profile fetch error:", err);
+    }
+}
+
+/* ---------------- SAVE PROFILE ---------------- */
+async function saveSettings() {
+    const newName = document.getElementById("editName").value;
+    const newPassword = document.getElementById("editPassword").value;
+    const avatarInput = document.getElementById("editAvatar");
+
+    const formData = new FormData();
+    if (newName) formData.append("name", newName);
+    if (newPassword) formData.append("password", newPassword);
+    if (avatarInput.files[0]) formData.append("avatar", avatarInput.files[0]);
+
+    try {
+        const response = await fetch(`http://localhost:3000/users/${user_id}`, {
+            method: "PATCH",
+            body: formData
+        });
+
+        if (response.ok) {
+            Swal.fire({ icon: "success", title: "Profile Updated!", background: "#1a0b2e", color: "#fff" });
+            fetchUserDetails();
+        } else {
+            Swal.fire({ icon: "error", title: "Update Failed", background: "#1a0b2e", color: "#fff" });
+        }
+    } catch (err) {
+        Swal.fire({ icon: "error", title: "Connection Error", background: "#1a0b2e", color: "#fff" });
+    }
+}
+
+/* ---------------- TRANSACTIONS (Updated to ₱) ---------------- */
+async function loadTransactions() {
+    try {
+        const response = await fetch(`http://localhost:3000/transactions/user/${user_id}`);
+        const data = await response.json();
+        const table = document.getElementById("transactionTable");
+        table.innerHTML = "";
+
+        let total = 0;
+        data.forEach(t => {
+            const amt = parseFloat(t.amount);
+            total += amt;
+            table.innerHTML += `
+                <tr>
+                    <td>${t.id}</td>
+                    <td style="font-weight:bold">₱${amt.toLocaleString('en-PH', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                    <td>${t.category}</td>
+                    <td>${t.date}</td>
+                    <td style="color:#888">${t.notes || ""}</td>
+                    <td>
+                        ${t.receipt 
+                            ? `<img src="http://localhost:3000/uploads/${t.receipt}" width="40" style="border-radius:4px">` 
+                            : "-"}
+                    </td>
+                    <td>
+                        <button onclick="deleteTransaction(${t.id})" style="background:#ff4d4d;color:white;border:none;padding:5px 10px;border-radius:4px;cursor:pointer">
+                            Delete
+                        </button>
+                    </td>
+                </tr>`;
+        });
+
+        document.getElementById("totalCount").innerText = data.length;
+        // Total Expenses in Peso
+        document.getElementById("totalExpenses").innerText = `₱${total.toLocaleString('en-PH', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+
+        updateBudgetUI(total);
+        updateDailyAverage(total);
+    } catch (err) {
+        console.error("Load transactions error:", err);
+    }
+}
+
+function updateDailyAverage(totalSpent) {
+    const now = new Date();
+    const daysPassed = now.getDate(); 
+    const average = totalSpent / daysPassed;
+    // Daily Average in Peso
+    document.getElementById("dailyAverage").innerText = `₱${average.toLocaleString('en-PH', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+}
+
+/* ---------------- BUDGET (Updated to ₱) ---------------- */
+async function setBudgetLimit() {
+    const mode = document.getElementById("budgetMode").value;
+    const storageKey = `budget_${mode}_${user_id}`;
+
+    const { value: budget } = await Swal.fire({
+        title: `Set ${mode.toUpperCase()} Limit (₱)`,
+        input: "number",
+        inputValue: localStorage.getItem(storageKey) || (mode === 'weekly' ? 2500 : 10000),
+        showCancelButton: true,
+        background: "#1a0b2e",
+        color: "#fff",
+        confirmButtonColor: "#9d4edd"
+    });
+
+    if (budget) {
+        localStorage.setItem(storageKey, budget);
+        loadTransactions();
+    }
+}
+
+function updateBudgetUI(totalSpent) {
+    const mode = document.getElementById("budgetMode").value;
+    const storageKey = `budget_${mode}_${user_id}`;
+    
+    // Default values adjusted: Weekly ₱2,500 | Monthly ₱10,000
+    const userLimit = parseFloat(localStorage.getItem(storageKey)) || (mode === "weekly" ? 2500 : 10000);
+
+    const percentage = (totalSpent / userLimit) * 100;
+    const remaining = userLimit - totalSpent;
+
+    document.getElementById("goalLabel").innerText = `${mode.charAt(0).toUpperCase() + mode.slice(1)} Spending`;
+    document.getElementById("budgetPercent").innerText = `${Math.round(percentage)}%`;
+    // Remaining Budget in Peso
+    document.getElementById("remainingBudget").innerText = `₱${remaining.toLocaleString('en-PH', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+
+    const bar = document.getElementById("budgetBar");
+    bar.style.width = `${Math.min(percentage, 100)}%`;
+    bar.style.background = percentage >= 100 ? "#ff4d4d" : "#9d4edd";
+}
+
+/* ---------------- ADD TRANSACTION ---------------- */
+document.getElementById("transactionForm").addEventListener("submit", async function(e) {
+    e.preventDefault();
+
+    const amountVal = document.getElementById("amount").value;
+    const categoryVal = document.getElementById("category").value;
+    const dateVal = document.getElementById("date").value;
+    const notesVal = document.getElementById("notes").value;
+    const receiptFile = document.getElementById("receipt").files[0];
+
+    const formData = new FormData();
+    formData.append("user_id", user_id);
+    formData.append("amount", amountVal);
+    formData.append("category", categoryVal);
+    formData.append("date", dateVal);
+    formData.append("notes", notesVal);
+
+    if (receiptFile) {
+        formData.append("receipt", receiptFile);
+    }
+
+    try {
+        const response = await fetch("http://localhost:3000/transactions", {
+            method: "POST",
+            body: formData
+        });
+
+        if (response.ok) {
+            Swal.fire({ icon: "success", title: "Transaction Added", background: "#1a0b2e", color: "#fff" });
+            toggleForm();
+            this.reset();
+            loadTransactions();
+        } else {
+            Swal.fire({ icon: "error", title: "Failed to add transaction", background: "#1a0b2e", color: "#fff" });
+        }
+    } catch (err) {
+        Swal.fire({ icon: "error", title: "Server error", background: "#1a0b2e", color: "#fff" });
+    }
+});
+
+/* ---------------- DELETE ---------------- */
+async function deleteTransaction(id) {
+    const result = await Swal.fire({
+        title: "Delete transaction?",
+        text: "This action cannot be undone!",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#9d4edd",
+        cancelButtonColor: "#ff4d4d",
+        background: "#1a0b2e",
+        color: "#fff"
+    });
+
+    if (result.isConfirmed) {
+        try {
+            await fetch(`http://localhost:3000/transactions/${id}`, { method: "DELETE" });
+            loadTransactions();
+        } catch (err) {
+            console.error("Delete error:", err);
+        }
+    }
+}
+
+/* ---------------- LOGOUT ---------------- */
+function logout() {
+    localStorage.removeItem("user_id");
+    window.location.href = "login.html";
+}
+
+// Initial Loads
+fetchUserDetails();
+loadTransactions();
+</script>
+</body>
+</html>
