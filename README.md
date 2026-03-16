@@ -22,7 +22,7 @@ For this assignment, two features were implemented in the Budget Tracker applica
 
 ---
 
-# Feature 1 – Record Transaction (Add New Expense)
+# Feature 1 – Implemented Record Transaction (Add New Expense)
 
 ### Purpose
 The purpose of this feature is to allow users to record their expenses so they can monitor and track their financial activity.
