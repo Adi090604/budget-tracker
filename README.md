@@ -52,7 +52,7 @@ After submitting the form, the transaction is saved to the database and displaye
 
 ---
 
-# Feature 2 – Budget Progress (Weekly / Monthly)
+# Feature 2 – Budget Progress feature added (Weekly / Monthly)
 
 ### Purpose
 The purpose of this feature is to help users monitor their spending over time by comparing their expenses to a budget limit.
