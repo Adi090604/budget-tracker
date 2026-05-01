@@ -229,7 +229,35 @@ input {
     border: 1px solid rgba(157, 78, 221, 0.1);
     backdrop-filter: blur(10px);
 }
-
+.category-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px;
+    border-radius: 10px;
+    margin-bottom: 8px;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(157, 78, 221, 0.2);
+    color: #e0aaff;
+}
+.top-category-card {
+    background: rgba(255,255,255,0.05);
+    padding: 16px;
+    border-radius: 14px;
+    margin-bottom: 16px;
+    border: 1px solid rgba(255,255,255,0.1);
+}
+.top-category-title {
+    font-size: 12px;
+    opacity: 0.7;
+    margin-bottom: 6px;
+}
+.top-category-content {
+    font-size: 18px;
+    font-weight: bold;
+}
+#categoryChart {
+    transition: opacity 0.3s ease;
+}
 .goal-info {
     display: flex;
     justify-content: space-between;

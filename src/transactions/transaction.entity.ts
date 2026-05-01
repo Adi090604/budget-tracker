@@ -4,24 +4,36 @@ import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
 export class Transaction {
 
   @PrimaryGeneratedColumn()
-  id: number;
+  id!: number;
 
   @Column()
-  user_id: number;
+  user_id!: number;
 
   @Column()
-  amount: number;
+  amount!: number;
 
   @Column()
-  category: string;
-
-  @Column()
-  date: string;
+  category!: string;
 
   @Column({ nullable: true })
-  notes: string;
+  categoryId!: number;
 
   @Column({ nullable: true })
-  receipt: string;
+  categoryName!: string;
+
+  @Column({ nullable: true })
+  categoryIcon!: string;
+
+  @Column({ nullable: true })
+  categoryColor!: string;
+
+  @Column()
+  date!: string;
+
+  @Column({ nullable: true })
+  notes!: string;
+
+  @Column({ nullable: true })
+  receipt!: string;
 
 }

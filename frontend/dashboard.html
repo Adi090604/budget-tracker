@@ -23,8 +23,8 @@
                 <a href="#" class="nav-link active" id="nav-overview" onclick="showSection('overview')">
                     <i class="fas fa-chart-line"></i> Overview
                 </a>
-                <a href="#" class="nav-link" id="nav-wallets" onclick="showSection('wallets')">
-                    <i class="fas fa-wallet"></i> Wallets
+                <a href="#" class="nav-link" id="categoriesMenu">
+                    <i class="fas fa-tags icon-category"></i> Categories
                 </a>
                 <a href="#" class="nav-link" onclick="toggleForm()">
                     <i class="fas fa-plus-circle"></i> Add New Expense
@@ -41,7 +41,7 @@
             </div>
         </aside>
 
-        <main class="main-content">
+        <main id="mainDashboard" class="main-content">
             <header class="header-row" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
                 <div>
                     <h1 class="main-title" id="pageTitle">Financial Overview</h1>
@@ -86,6 +86,22 @@
                             <div id="budgetBar" class="progress-fill"></div>
                         </div>
                         <p class="goal-status">Remaining: <span id="remainingBudget">₱0.00</span></p>
+                    </div>
+                </section>
+
+                <section class="category-summary-section" style="margin-top:20px;">
+                    <div class="goals-header" style="margin-bottom: 10px; display:flex; align-items:center; justify-content:space-between; gap:15px;">
+                        <h2>Category Summary</h2>
+                        <select id="summaryFilter" style="background: #1a0b2e; color: #fff; border: 1px solid #3c096c; padding: 8px 10px; border-radius: 10px; cursor: pointer;">
+                            <option value="day">Today</option>
+                            <option value="week">This Week</option>
+                            <option value="month" selected>This Month</option>
+                        </select>
+                    </div>
+                    <p id="currentFilterLabel" style="color:#c77dff; margin-bottom:15px;">Showing: This Month</p>
+                    <div id="categorySummary" style="display:grid; gap:10px;"></div>
+                    <div style="margin-top:20px; background: rgba(255,255,255,0.03); border:1px solid rgba(157, 78, 221, 0.1); border-radius:20px; padding:20px;">
+                        <canvas id="categoryChart" style="width:100%;height:320px;"></canvas>
                     </div>
                 </section>
 
@@ -146,6 +162,20 @@
                 </div>
             </div>
         </main>
+
+        <div id="categoriesView" class="main-content" style="display:none; padding: 50px; max-width: 1200px; margin-left: 260px;">
+            <div class="table-container" style="background: rgba(20, 20, 25, 0.5); padding: 30px; border-radius: 24px; border: 1px solid rgba(157, 78, 221, 0.1);">
+                <div class="table-header">
+                    <h2>Categories</h2>
+                </div>
+                <div id="categoriesList" style="display:grid; gap:12px; margin-top:20px;"></div>
+                <div style="display:flex; gap:10px; margin-top:20px; flex-wrap:wrap; align-items:center;">
+                    <input type="text" id="newCategoryName" placeholder="New Category Name" style="flex:1; padding:12px; border-radius:12px; background:#0f051d; border:1px solid #3c096c; color:#fff;">
+                    <input type="text" id="categoryIcon" placeholder="Icon (optional)" style="width:110px; padding:12px; border-radius:12px; background:#0f051d; border:1px solid #3c096c; color:#fff; text-align:center;">
+                    <button type="button" onclick="addCategory()" style="background:#9d4edd; color:white; border:none; border-radius:12px; padding:12px 20px; cursor:pointer;">Add Category</button>
+                </div>
+            </div>
+        </div>
     </div>
 
     <div id="formSection" class="form-wrapper" style="display:none; position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:1000; justify-content:center; align-items:center;">
@@ -156,7 +186,9 @@
             </div>
             <form id="transactionForm" style="display:flex; flex-direction:column; gap:15px;">
                 <input type="number" id="amount" placeholder="Amount" required step="0.01" style="padding:10px; border-radius:5px; border:1px solid #3c096c; background:#0f051d; color:white;">
-                <input type="text" id="category" placeholder="Category" required style="padding:10px; border-radius:5px; border:1px solid #3c096c; background:#0f051d; color:white;">
+                <select id="category" required style="padding:10px; border-radius:5px; border:1px solid #3c096c; background:#0f051d; color:white;">
+                    <option value="">Select Category</option>
+                </select>
                 <input type="date" id="date" required style="padding:10px; border-radius:5px; border:1px solid #3c096c; background:#0f051d; color:white;">
                 <input type="text" id="notes" placeholder="Notes (Optional)" style="padding:10px; border-radius:5px; border:1px solid #3c096c; background:#0f051d; color:white;">
                 <input type="file" id="receipt" style="color:#888;">
@@ -165,6 +197,7 @@
         </div>
     </div>
 
+   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
    <script>
 const user_id = localStorage.getItem("user_id");
 if (!user_id) window.location.href = "login.html";
@@ -172,14 +205,64 @@ if (!user_id) window.location.href = "login.html";
 // Set current date on load
 document.getElementById("currentDate").innerText = new Date().toDateString();
 
+const categoryKeywords = {
+    food: ['food', 'meal', 'restaurant', 'eat', 'snack'],
+    transportation: ['transport', 'fare', 'gas', 'taxi', 'ride'],
+    bills: ['bill', 'electric', 'water', 'rent'],
+    shopping: ['shop', 'purchase', 'buy'],
+    entertainment: ['game', 'movie', 'music', 'netflix'],
+};
+
+const categoryIcons = {
+    food: '🍔',
+    transportation: '🚗',
+    bills: '💡',
+    shopping: '🛍️',
+    entertainment: '🎮',
+};
+
+function detectCategory(text) {
+    const lower = text.toLowerCase();
+
+    for (const category in categoryKeywords) {
+        if (categoryKeywords[category].some(word => lower.includes(word))) {
+            return category;
+        }
+    }
+
+    return null;
+}
+
+const newCategoryNameInput = document.getElementById('newCategoryName');
+const categoryIconInput = document.getElementById('categoryIcon');
+
+if (newCategoryNameInput && categoryIconInput) {
+    newCategoryNameInput.addEventListener('input', (e) => {
+        const detected = detectCategory(e.target.value || '');
+        if (!detected) return;
+
+        const suggestedIcon = categoryIcons[detected];
+        const currentIcon = categoryIconInput.value.trim();
+        const hasCustomIcon = currentIcon && !Object.values(categoryIcons).includes(currentIcon);
+
+        if (!hasCustomIcon) {
+            categoryIconInput.value = suggestedIcon;
+        }
+    });
+}
+
 /* ---------------- NAVIGATION ---------------- */
 function showSection(sectionId) {
     const overview = document.getElementById("overviewSection");
     const settings = document.getElementById("settingsSection");
+    const categoriesView = document.getElementById("categoriesView");
+    const mainDashboard = document.getElementById("mainDashboard");
     const pageTitle = document.getElementById("pageTitle");
 
     overview.style.display = "none";
     settings.style.display = "none";
+    if (categoriesView) categoriesView.style.display = "none";
+    if (mainDashboard) mainDashboard.style.display = "block";
 
     if (sectionId === "settings") {
         settings.style.display = "block";
@@ -256,22 +339,46 @@ async function saveSettings() {
 }
 
 /* ---------------- TRANSACTIONS (Updated to ₱) ---------------- */
+let allTransactions = [];
+let currentSummaryFilter = 'month';
+
 async function loadTransactions() {
     try {
         const response = await fetch(`http://localhost:3000/transactions/user/${user_id}`);
         const data = await response.json();
+        allTransactions = data;
         const table = document.getElementById("transactionTable");
         table.innerHTML = "";
 
         let total = 0;
+        const categorySummary = {};
+
         data.forEach(t => {
             const amt = parseFloat(t.amount);
+            const categoryName = t.categoryName || t.category || 'Uncategorized';
+            const categoryIcon = t.categoryIcon || '•';
+            const categoryColor = t.categoryColor || '#9d4edd';
             total += amt;
+
+            if (!categorySummary[categoryName]) {
+                categorySummary[categoryName] = {
+                    amount: 0,
+                    icon: categoryIcon,
+                    color: categoryColor,
+                };
+            }
+            categorySummary[categoryName].amount += amt;
+
             table.innerHTML += `
                 <tr>
                     <td>${t.id}</td>
                     <td style="font-weight:bold">₱${amt.toLocaleString('en-PH', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
-                    <td>${t.category}</td>
+                    <td>
+                        <span style="background: ${categoryColor}; padding: 5px 10px; border-radius: 20px; font-size: 12px; color: #000; display: inline-flex; align-items: center; gap: 6px;">
+                            ${categoryIcon}
+                            ${categoryName}
+                        </span>
+                    </td>
                     <td>${t.date}</td>
                     <td style="color:#888">${t.notes || ""}</td>
                     <td>
@@ -291,6 +398,7 @@ async function loadTransactions() {
         // Total Expenses in Peso
         document.getElementById("totalExpenses").innerText = `₱${total.toLocaleString('en-PH', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
 
+        updateDashboard(currentSummaryFilter);
         updateBudgetUI(total);
         updateDailyAverage(total);
     } catch (err) {
@@ -304,6 +412,308 @@ function updateDailyAverage(totalSpent) {
     const average = totalSpent / daysPassed;
     // Daily Average in Peso
     document.getElementById("dailyAverage").innerText = `₱${average.toLocaleString('en-PH', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+}
+
+async function loadCategories() {
+    try {
+        const response = await fetch('http://localhost:3000/categories');
+        const categories = await response.json();
+        const select = document.getElementById('category');
+        select.innerHTML = '<option value="">Select Category</option>';
+
+        categories.forEach(cat => {
+            const option = document.createElement('option');
+            option.value = cat.id;
+            option.textContent = cat.name;
+            select.appendChild(option);
+        });
+    } catch (err) {
+        console.error('Category load error:', err);
+    }
+}
+
+function filterTransactions(transactions, type) {
+    const now = new Date();
+
+    return transactions.filter(tx => {
+        const txDate = new Date(tx.date);
+
+        if (type === 'day') {
+            return txDate.toDateString() === now.toDateString();
+        }
+
+        if (type === 'week') {
+            const weekAgo = new Date();
+            weekAgo.setDate(now.getDate() - 7);
+            return txDate >= weekAgo;
+        }
+
+        if (type === 'month') {
+            return (
+                txDate.getMonth() === now.getMonth() &&
+                txDate.getFullYear() === now.getFullYear()
+            );
+        }
+
+        return true;
+    });
+}
+
+function updateFilterLabel(filter) {
+    const label = document.getElementById('currentFilterLabel');
+    if (!label) return;
+    label.textContent = filter === 'day' ? 'Showing: Today' : filter === 'week' ? 'Showing: This Week' : 'Showing: This Month';
+}
+
+function updateDashboard(filter = 'month') {
+    currentSummaryFilter = filter;
+    updateFilterLabel(filter);
+    const filtered = filterTransactions(allTransactions, filter);
+
+    const categorySummary = {};
+    filtered.forEach(t => {
+        const amt = parseFloat(t.amount);
+        const categoryName = t.categoryName || t.category || 'Uncategorized';
+        const categoryIcon = t.categoryIcon || '•';
+        const categoryColor = t.categoryColor || '#9d4edd';
+
+        if (!categorySummary[categoryName]) {
+            categorySummary[categoryName] = {
+                amount: 0,
+                icon: categoryIcon,
+                color: categoryColor,
+            };
+        }
+        categorySummary[categoryName].amount += amt;
+    });
+
+    renderTopCategory(categorySummary);
+    renderCategorySummary(categorySummary);
+    animateChartUpdate(categorySummary);
+}
+
+async function loadCategoriesList() {
+    try {
+        const res = await fetch('http://localhost:3000/categories');
+        const data = await res.json();
+        const container = document.getElementById('categoriesList');
+        container.innerHTML = '';
+
+        data.forEach(cat => {
+            const div = document.createElement('div');
+            div.className = 'category-item';
+            div.innerHTML = `
+                <span>${cat.icon || '📁'} ${cat.name}</span>
+                <button onclick="deleteCategory(${cat.id})" style="background:#ff4d4d;color:white;border:none;padding:6px 12px;border-radius:8px;cursor:pointer;">Delete</button>
+            `;
+            container.appendChild(div);
+        });
+    } catch (err) {
+        console.error('Load categories list error:', err);
+    }
+}
+
+async function addCategory() {
+    const name = document.getElementById('newCategoryName').value;
+    if (!name) return;
+
+    try {
+        const iconValue = document.getElementById('categoryIcon').value.trim();
+        const response = await fetch('http://localhost:3000/categories', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ name, icon: iconValue || undefined })
+        });
+
+        if (!response.ok) {
+            throw new Error('Failed to add category');
+        }
+
+        document.getElementById('newCategoryName').value = '';
+        document.getElementById('categoryIcon').value = '';
+        await loadCategoriesList();
+        await loadCategories();
+        await loadTransactions();
+
+        Swal.fire({
+            icon: 'success',
+            title: 'Category added!',
+            text: `${name} is now available in the transaction form.`,
+            background: '#1a0b2e',
+            color: '#fff',
+            confirmButtonColor: '#9d4edd'
+        });
+    } catch (err) {
+        console.error('Add category error:', err);
+        Swal.fire({
+            icon: 'error',
+            title: 'Could not add category',
+            text: err.message || 'Please try again.',
+            background: '#1a0b2e',
+            color: '#fff',
+            confirmButtonColor: '#9d4edd'
+        });
+    }
+}
+
+async function deleteCategory(id) {
+    try {
+        const response = await fetch(`http://localhost:3000/categories/${id}`, {
+            method: 'DELETE'
+        });
+
+        if (!response.ok) {
+            throw new Error('Failed to delete category');
+        }
+
+        await loadCategoriesList();
+        await loadCategories();
+        await loadTransactions();
+    } catch (err) {
+        console.error('Delete category error:', err);
+    }
+}
+
+document.getElementById('summaryFilter').addEventListener('change', (e) => {
+    const selected = e.target.value;
+    updateDashboard(selected);
+});
+
+document.getElementById('categoriesMenu').addEventListener('click', (e) => {
+    e.preventDefault();
+    showCategoriesView();
+});
+
+function showCategoriesView() {
+    const categoriesView = document.getElementById('categoriesView');
+    const mainDashboard = document.getElementById('mainDashboard');
+
+    if (categoriesView) categoriesView.style.display = 'block';
+    if (mainDashboard) mainDashboard.style.display = 'none';
+
+    document.querySelectorAll('.nav-link').forEach(link => link.classList.remove('active'));
+    const categoriesMenu = document.getElementById('categoriesMenu');
+    if (categoriesMenu) categoriesMenu.classList.add('active');
+
+    loadCategoriesList();
+}
+
+function showDashboard() {
+    const categoriesView = document.getElementById('categoriesView');
+    const mainDashboard = document.getElementById('mainDashboard');
+
+    if (categoriesView) categoriesView.style.display = 'none';
+    if (mainDashboard) mainDashboard.style.display = 'block';
+
+    document.querySelectorAll('.nav-link').forEach(link => link.classList.remove('active'));
+    const overviewLink = document.getElementById('nav-overview');
+    if (overviewLink) overviewLink.classList.add('active');
+
+    loadTransactions();
+}
+
+function getTopCategory(summary) {
+    let max = 0;
+    let top = null;
+
+    for (const key in summary) {
+        if (summary[key].amount > max) {
+            max = summary[key].amount;
+            top = key;
+        }
+    }
+
+    return { name: top, amount: max };
+}
+
+function renderTopCategory(summary) {
+    const top = getTopCategory(summary);
+    const el = document.getElementById('topCategoryContent');
+    if (!el) return;
+
+    if (!top.name) {
+        el.textContent = '--';
+        return;
+    }
+
+    el.innerHTML = `${top.name} — ₱${top.amount.toLocaleString('en-PH', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+}
+
+function animateChartUpdate(summaryData) {
+    const chartCanvas = document.getElementById('categoryChart');
+    if (!chartCanvas) return;
+    chartCanvas.style.opacity = '0';
+
+    setTimeout(() => {
+        renderChart(summaryData);
+        chartCanvas.style.opacity = '1';
+    }, 200);
+}
+
+function renderCategorySummary(categoryData) {
+    const summary = document.getElementById('categorySummary');
+    summary.innerHTML = '';
+
+    const entries = Object.entries(categoryData);
+    if (entries.length === 0) {
+        summary.innerHTML = '<div style="color:#888;">No category totals yet.</div>';
+        return;
+    }
+
+    entries.forEach(([name, details]) => {
+        const item = document.createElement('div');
+        item.className = 'category-item';
+        item.innerHTML = `
+            <span>${details.icon} ${name}</span>
+            <strong>₱${details.amount.toLocaleString('en-PH', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</strong>
+        `;
+        item.style.border = '1px solid rgba(157, 78, 221, 0.2)';
+        item.style.background = 'rgba(255,255,255,0.03)';
+        summary.appendChild(item);
+    });
+}
+
+let categoryChart;
+
+function renderChart(categoryData) {
+    const ctx = document.getElementById('categoryChart');
+    if (!ctx) return;
+
+    const labels = Object.keys(categoryData);
+    const values = Object.values(categoryData).map(item => item.amount);
+    const colors = Object.values(categoryData).map(item => item.color || '#9d4edd');
+
+    if (categoryChart) {
+        categoryChart.destroy();
+    }
+
+    categoryChart = new Chart(ctx, {
+        type: 'pie',
+        data: {
+            labels,
+            datasets: [{
+                data: values,
+                backgroundColor: colors,
+                borderColor: '#120c1d',
+                borderWidth: 2,
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            animation: {
+                duration: 800,
+                easing: 'easeOutQuart'
+            },
+            plugins: {
+                legend: {
+                    labels: {
+                        color: '#e0aaff'
+                    }
+                }
+            }
+        }
+    });
 }
 
 /* ---------------- BUDGET (Updated to ₱) ---------------- */
@@ -360,7 +770,7 @@ document.getElementById("transactionForm").addEventListener("submit", async func
     const formData = new FormData();
     formData.append("user_id", user_id);
     formData.append("amount", amountVal);
-    formData.append("category", categoryVal);
+    formData.append("categoryId", categoryVal);
     formData.append("date", dateVal);
     formData.append("notes", notesVal);
 
@@ -418,6 +828,7 @@ function logout() {
 
 // Initial Loads
 fetchUserDetails();
+loadCategories();
 loadTransactions();
 </script>
 </body>
