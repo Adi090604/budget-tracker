@@ -1,111 +1,165 @@
-# Budget Tracker Application
+# 💰 Budget Tracker Application
 
 ## Student Information
-Name: Adrian Dela Cruz 
-Assignment: Assignment 1 – Implement Two Small Features  
-Application: Budget Tracker System
 
+**Name:** Adrian Dela Cruz
+**Assignment:** Assignment 1 – Implement Two Small Features
+**Application:** Budget Tracker System
 
-# Overview
-This project is a **Budget Tracker web application** that allows users to manage their expenses and monitor their financial activity. The application provides a dashboard where users can record transactions, view spending statistics, and track their budget progress.
+---
 
-The system includes a **transaction recording feature and a budget progress tracker with a spending limit**, helping users understand how much of their budget has been used.
+## Overview
 
-The system is designed to run **locally**, ensuring that it works even with unstable internet connections.
+The **Budget Tracker Application** is a web-based system designed to help users manage their expenses, monitor financial activity, and analyze spending behavior.
 
-# Implemented Features
+The system provides an interactive dashboard where users can:
 
-For this assignment, two features were implemented in the Budget Tracker application:
+* Record expenses
+* Track budget usage
+* Analyze spending patterns
+* Manage categories and financial data
+
+The application is designed to run **locally**, ensuring accessibility even without a stable internet connection.
+
+---
+
+## Quick Start
+
+1. Run `npm install`
+2. Run `npm run start:dev`
+3. Open `frontend/dashboard.html`
+
+---
+
+## Implemented Features
+
+The system includes the following fully implemented features:
 
 1. **Record Transaction (Add New Expense)**
 2. **Budget Progress (Weekly / Monthly)**
+3. **Profile Settings Management**
+4. **Category Management**
+5. **Category Summary with Data Visualization**
+6. **Time-Based Filtering (Day / Week / Month)**
+7. **Category Icon Suggestion (Keyword-Based)**
 
 ---
 
-# Feature 1 – Implemented Record Transaction (Add New Expense)
+##  How to Run the Application
 
-### Purpose
-The purpose of this feature is to allow users to record their expenses so they can monitor and track their financial activity.
+### 1. Clone the Repository
 
-### Expected User
-Students or individuals who want to manage their personal spending using the Budget Tracker system.
-
-### Main Functionality
-The system provides a form where users can input transaction details such as:
-
-- Amount  
-- Category  
-- Date  
-- Notes (optional)  
-- Receipt upload  
-
-After submitting the form, the transaction is saved to the database and displayed in the **Recent Transactions table** on the dashboard.
-
-### Acceptance Criteria
-
-- The user must be able to enter the **transaction amount**
-- The user must be able to enter or select a **category**
-- The user must be able to choose a **transaction date**
-- The user must be able to add **optional notes**
-- The user must be able to **upload a receipt image**
-- The transaction must appear in the **Recent Transactions list** after saving
+```bash
+git clone <your-repository-url>
+cd <your-project-folder>
+```
 
 ---
 
-# Feature 2 – Budget Progress feature added (Weekly / Monthly)
+### 2. Install Dependencies
 
-### Purpose
-The purpose of this feature is to help users monitor their spending over time by comparing their expenses to a budget limit.
-
-### Expected User
-Students or individuals who want to track and control their spending.
-
-### Main Functionality
-The dashboard includes a **Budget Progress section** that visually displays how much of the user's budget has been used.
-
-The system shows:
-
-- Weekly or monthly spending
-- A progress bar indicating percentage of budget used
-- The remaining amount of budget
-
-Users can switch between **Weekly and Monthly views** using a dropdown menu. The progress bar automatically updates when new expenses are added.
-
-### Acceptance Criteria
-
-- The dashboard must display the **Budget Progress section**
-- The user must be able to select **Weekly or Monthly view**
-- The system must calculate **spending based on the selected timeframe**
-- The progress bar must show the **percentage of budget used**
-- The system must display the **remaining budget amount**
-- The progress bar must update automatically when **new expenses are added**
+```bash
+npm install
+```
 
 ---
 
-# What I Implemented
+### 3. Setup Database (MySQL via WAMP / phpMyAdmin)
 
-The following functionality was implemented in the application:
+1. Open **phpMyAdmin**
+2. Create database:
 
-- A **transaction recording system** where users can add expenses
-- A **dashboard overview** displaying financial statistics
-- A **Budget Progress feature** showing spending compared to a budget limit
-- A **Recent Transactions table** displaying saved expenses
-- A **user profile and account settings page**
+```text
+budget_tracker
+```
 
-These features are integrated into the dashboard and connected to the backend database.
+3. Configure database connection in:
+
+```text
+src/app.module.ts
+```
+
+Example:
+
+```ts
+TypeOrmModule.forRoot({
+  type: 'mysql',
+  host: 'localhost',
+  port: 3306,
+  username: 'root',
+  password: '',
+  database: 'budget_tracker',
+  autoLoadEntities: true,
+  synchronize: true,
+})
+```
 
 ---
 
-# Challenges Encountered
+### 4. Run Backend Server
 
-During development, several challenges were encountered:
+```bash
+npm run start:dev
+```
 
-- Configuring the **database connection using NestJS and TypeORM**
-- Implementing **file uploads for receipt images**
-- Ensuring the dashboard updates correctly when new transactions are added
-- Connecting the frontend forms to backend API endpoints
+Expected output:
+
+```text
+Application is running on: http://localhost:3000
+```
 
 ---
+
+### 5. Open Frontend
+
+Open:
+
+```text
+frontend/dashboard.html
+```
+
+---
+
+### 6. Verify System
+
+Ensure the following features work:
+
+* Add new transaction
+* Category dropdown loads correctly
+* Budget progress updates dynamically
+* Category summary and pie chart display correctly
+* Time-based filtering works
+* Data is saved and retrieved properly
+
+---
+
+##  System Features Overview
+
+The system integrates multiple functionalities into a unified dashboard:
+
+* Expense recording and tracking
+* Budget monitoring with progress visualization
+* Category-based expense organization
+* Data visualization using charts
+* Time-based financial analysis
+* User profile management
+* Intelligent icon suggestion for categories
+
+---
+
+##  Challenges Encountered
+
+During development, several challenges were addressed:
+
+* Configuring **NestJS with TypeORM and MySQL**
+* Implementing **file upload functionality for receipts**
+* Ensuring real-time dashboard updates
+* Integrating frontend with backend APIs
+* Managing state and data consistency across features
+
+---
+
+##  Screenshots
 
 # Screenshots
 
@@ -131,17 +185,37 @@ The following screenshots demonstrate the working features of the application.
 
 ---
 
-# Technologies Used
+##  Technologies Used
 
 ### Frontend
-- HTML
-- CSS
-- JavaScript
+
+* HTML
+* CSS
+* JavaScript
 
 ### Backend
-- NestJS
-- TypeScript
+
+* NestJS
+* TypeScript
 
 ### Database
-- MySQL
-- phpMyAdmin (WAMP)
+
+* MySQL
+* phpMyAdmin (WAMP)
+
+---
+
+## Notes
+
+* Ensure WAMP server is running before starting backend
+* Default MySQL credentials:
+
+  * Username: `root`
+  * Password: *(empty)*
+* If port `3000` is unavailable, modify `main.ts`
+
+---
+
+## Conclusion
+
+The Budget Tracker system demonstrates a complete implementation of expense tracking, budget monitoring, and data visualization features. The integration of multiple components provides a user-friendly and functional financial management tool.
